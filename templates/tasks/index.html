@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Ýerine Ýetirmeli Işler we Maksatlar - TalypMeýilnama{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  
+  <!-- Header Title & Filter Tabs -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+    <div>
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-bold mb-1 border border-amber-200 dark:border-amber-800">
+        <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+        <span>Maksatlar & Ýumuşlar</span>
+      </div>
+      <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Ýerine Ýetirmeli Işler</h2>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Möhletli işler, kiçi ýumuşlar we talybyň aýratyn maksatlary</p>
+    </div>
+    
+    <!-- Status Filter Buttons -->
+    <div class="flex items-center gap-2 text-xs">
+      <a href="?status=pending{% if current_category %}&category={{ current_category }}{% endif %}" class="px-3.5 py-1.5 rounded-xl border font-bold transition-all {% if current_status == 'pending' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+        Garaşylýan ({% if current_status == 'pending' %}{{ tasks.count }}{% endif %})
+      </a>
+      <a href="?status=completed{% if current_category %}&category={{ current_category }}{% endif %}" class="px-3.5 py-1.5 rounded-xl border font-bold transition-all {% if current_status == 'completed' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+        Ýerine ýetirilen
+      </a>
+      <a href="?status=all{% if current_category %}&category={{ current_category }}{% endif %}" class="px-3.5 py-1.5 rounded-xl border font-bold transition-all {% if current_status == 'all' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+        Hemmesi
+      </a>
+    </div>
+  </div>
+
+  <!-- Category Pills Filter -->
+  <div class="flex flex-wrap items-center gap-2 text-xs">
+    <a href="?status={{ current_status }}" class="px-3 py-1.5 rounded-xl font-bold transition-all {% if not current_category %}bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+      Ähli bölümler
+    </a>
+    {% for cat in categories %}
+    <a href="?status={{ current_status }}&category={{ cat.slug }}" class="px-3 py-1.5 rounded-xl font-bold transition-all {% if current_category == cat.slug %}bg-indigo-600 text-white shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+      {{ cat.name }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Tasks List -->
+  <div class="space-y-3">
+    {% for task in tasks %}
+    <div class="card-hover bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+      <div class="flex items-start gap-3.5">
+        <span class="w-3 h-3 rounded-full mt-1.5 shrink-0 {% if task.priority == 'yokary' %}bg-rose-500 ring-4 ring-rose-100 dark:ring-rose-950{% elif task.priority == 'orta' %}bg-amber-500 ring-4 ring-amber-100 dark:ring-amber-950{% else %}bg-emerald-500 ring-4 ring-emerald-100 dark:ring-emerald-950{% endif %}"></span>
+        <div class="space-y-1.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-extrabold text-slate-900 dark:text-white text-base {% if task.is_completed %}line-through text-slate-400 dark:text-slate-500{% endif %}">
+              {{ task.title }}
+            </h3>
+            {% if task.category %}
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800">
+                {{ task.category.name }}
+              </span>
+            {% endif %}
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold {% if task.priority == 'yokary' %}bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300{% elif task.priority == 'orta' %}bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300{% else %}bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300{% endif %}">
+              {{ task.get_priority_display }} dereje
+            </span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+            {% if task.deadline_date %}
+              <span class="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-semibold">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i>
+                <span>Möhleti: {{ task.deadline_date|date:"d M Y" }}{% if task.deadline_time %}, {{ task.deadline_time|time:"H:i" }}{% endif %}</span>
+              </span>
+            {% endif %}
+            {% if task.related_subject %}
+              <span class="flex items-center gap-1">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-emerald-500"></i>
+                <span>{{ task.related_subject.name }}</span>
+              </span>
+            {% endif %}
+          </div>
+
+          {% if task.notes %}
+            <p class="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+              {{ task.notes }}
+            </p>
+          {% endif %}
+
+          <!-- Subtasks -->
+          {% if task.subtasks.all %}
+            <div class="pt-2 space-y-1.5 border-t border-slate-100 dark:border-slate-800">
+              <span class="text-[11px] font-bold text-slate-400">Kiçi ýumuşlar:</span>
+              {% for sub in task.subtasks.all %}
+                <div class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
+                  <i data-lucide="{% if sub.is_completed %}check-circle-2{% else %}circle{% endif %}" class="w-3.5 h-3.5 {% if sub.is_completed %}text-emerald-500{% else %}text-slate-400{% endif %}"></i>
+                  <span class="{% if sub.is_completed %}line-through text-slate-400{% endif %}">{{ sub.title }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="self-end sm:self-center shrink-0">
+        <a href="/admin/tasks/task/{{ task.id }}/change/" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          Üýtgetmek
+        </a>
+      </div>
+    </div>
+    {% empty %}
+      <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xs">
+        <i data-lucide="check-square" class="w-10 h-10 text-emerald-500 mx-auto mb-2"></i>
+        <h4 class="font-extrabold text-base text-slate-900 dark:text-white">Ýerine ýetirilmeli iş ýok</h4>
+        <p class="text-xs text-slate-500 mt-1">Ähli işleriňiz üstünlikli ýerine ýetirildi ýa-da admin paneli arkaly täze iş goşuň.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

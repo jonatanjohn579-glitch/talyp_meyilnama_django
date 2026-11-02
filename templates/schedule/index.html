@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+
+{% block title %}Talyp Raspisaniýasy we Esasy Portal - TalypMeýilnama{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- ========================================== -->
+  <!-- 1. TOP HERO BANNER (MATCHING REACT DESIGN) -->
+  <!-- ========================================== -->
+  <div class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span>{{ today_day_name }}, {{ active_week|title }} Hepde</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          Talyp Raspisaniýasy & Gündelik Tertip
+        </h2>
+        <p class="text-xs sm:text-sm text-indigo-100 max-w-xl leading-relaxed">
+          Sapaklaryňyz, jaň wagtlary, möhletli öý işleriňiz we şahsy bellikleriňiz bir ýerde jemlendi.
+        </p>
+      </div>
+
+      <!-- Quick AI bot prompt card -->
+      <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-xs space-y-2 max-w-xs shrink-0 shadow-lg">
+        <div class="font-bold flex items-center gap-1.5 text-amber-300">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>AI Bellik & Raspisaniýa Kömekçisi</span>
+        </div>
+        <p class="text-indigo-100 text-[11px] leading-relaxed">
+          Ýazan bellikleriňiz ýa-da sapaklar barada islän zadyňyzy sorap bilersiňiz.
+        </p>
+        <button 
+          onclick="openBotDrawer()" 
+          class="w-full py-2 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 shadow-sm transition-colors text-center cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Sorag Soramak</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. FOUR CORE STAT SUMMARY CARDS -->
+  <!-- ========================================== -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <!-- 1. Raspisaniýa -->
+    <a href="{% url 'schedule_index' %}" class="card-hover bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between group">
+      <div>
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Şu günki sapaklar</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">
+          {{ lessons.count }} <span class="text-xs font-normal text-slate-400">para</span>
+        </div>
+      </div>
+      <div class="w-11 h-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i data-lucide="calendar" class="w-5 h-5"></i>
+      </div>
+    </a>
+
+    <!-- 2. Işler (Tasks) -->
+    <a href="{% url 'tasks_index' %}" class="card-hover bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between group">
+      <div>
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Garaşylýan işler</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">
+          {{ tasks_count }} <span class="text-xs font-normal text-slate-400">iş</span>
+        </div>
+      </div>
+      <div class="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i data-lucide="check-square" class="w-5 h-5"></i>
+      </div>
+    </a>
+
+    <!-- 3. Öý Işleri (Homework) -->
+    <a href="{% url 'homework_index' %}" class="card-hover bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between group">
+      <div>
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Öý işleri</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">
+          {{ homeworks_count }} <span class="text-xs font-normal text-slate-400">tabşyryk</span>
+        </div>
+      </div>
+      <div class="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i data-lucide="book-open" class="w-5 h-5"></i>
+      </div>
+    </a>
+
+    <!-- 4. Gatnaşyk (Attendance) -->
+    <a href="{% url 'attendance_index' %}" class="card-hover bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between group">
+      <div>
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Sapak gatnaşygy</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">
+          {{ attendance_records.count }} <span class="text-xs font-normal text-slate-400">sapak</span>
+        </div>
+      </div>
+      <div class="w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i data-lucide="clock" class="w-5 h-5"></i>
+      </div>
+    </a>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. INSTANT LIVE SEARCH & SORT BAR -->
+  <!-- ========================================== -->
+  <div class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <i data-lucide="search" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+        <h3 class="font-bold text-slate-900 dark:text-white text-sm">
+          Sapaklary Gözlemek & Dessine Tertipleşdirmek
+        </h3>
+        <span id="search-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+          Dessine süzülýär
+        </span>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-slate-400">Tertiple:</span>
+        <select id="sort-select" onchange="runClientSearchSort()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none">
+          <option value="relevance">Gözleg gabat gelşi</option>
+          <option value="period">Jaň tertibi boýunça (1, 2, 3...)</option>
+          <option value="name">Sapak ady boýunça (A-Z)</option>
+          <option value="notes">Diňe bellikleri bolanlar</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Live Search Input -->
+    <div class="relative">
+      <input 
+        id="lesson-search-input"
+        type="text" 
+        value="{{ search_query }}"
+        placeholder="Gözleg sözi: Sapak ady, mugallym, otag ýa-da konspekt bellikleri..."
+        oninput="runClientSearchSort()"
+        class="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-2xs"
+      />
+      <div class="absolute left-3.5 top-3 text-slate-400">
+        <i data-lucide="search" class="w-4 h-4"></i>
+      </div>
+      <button 
+        id="clear-search-btn" 
+        onclick="clearSearchInput()" 
+        class="hidden absolute right-3 top-2 text-slate-400 hover:text-slate-600 text-base font-bold cursor-pointer"
+      >&times;</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. WEEK & DAY SELECTOR TABS -->
+  <!-- ========================================== -->
+  <div class="space-y-3">
+    <!-- Week Selector Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Hepde:</span>
+        <span class="text-xs text-indigo-600 dark:text-indigo-400 font-bold">
+          {% if selected_week == 'sanawjy' %}1-nji Hepde (Sanawjy / Çislitel)
+          {% elif selected_week == 'maydalawjy' %}2-nji Hepde (Maýdalawjy / Znamenatel)
+          {% else %}Ähli hepdeler (Umumy)
+          {% endif %}
+        </span>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <a href="?day={{ selected_day }}&week=sanawjy" class="px-3 py-1.5 rounded-xl border font-bold transition-all {% if selected_week == 'sanawjy' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+          1-nji (Sanawjy)
+        </a>
+        <a href="?day={{ selected_day }}&week=maydalawjy" class="px-3 py-1.5 rounded-xl border font-bold transition-all {% if selected_week == 'maydalawjy' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+          2-nji (Maýdalawjy)
+        </a>
+        <a href="?day={{ selected_day }}&week=all" class="px-3 py-1.5 rounded-xl border font-bold transition-all {% if selected_week == 'all' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+          Hemmesi
+        </a>
+      </div>
+    </div>
+
+    <!-- Day Buttons Grid with Badge Counters -->
+    <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center text-xs font-bold">
+      <a href="?day=monday&week={{ selected_week }}" class="p-3 rounded-2xl border transition-all {% if selected_day == 'monday' %}bg-indigo-600 text-white border-indigo-600 shadow-sm{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %}">
+        <div class="font-extrabold">Duşenbe</div>
+        <div class="text-[10px] font-normal opacity-80 mt-0.5">1-nji gün</div>
+      </a>
+      <a href="?day=tuesday&week={{ selected_week }}" class="p-3 rounded-2xl border transition-all {% if selected_day == 'tuesday' %}bg-indigo-600 text-white border-indigo-600 shadow-sm{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %}">
+        <div class="font-extrabold">Sişenbe</div>
+        <div class="text-[10px] font-normal opacity-80 mt-0.5">2-nji gün</div>
+      </a>
+      <a href="?day=wednesday&week={{ selected_week }}" class="p-3 rounded-2xl border transition-all {% if selected_day == 'wednesday' %}bg-indigo-600 text-white border-indigo-600 shadow-sm{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %}">
+        <div class="font-extrabold">Çarşenbe</div>
+        <div class="text-[10px] font-normal opacity-80 mt-0.5">3-nji gün</div>
+      </a>
+      <a href="?day=thursday&week={{ selected_week }}" class="p-3 rounded-2xl border transition-all {% if selected_day == 'thursday' %}bg-indigo-600 text-white border-indigo-600 shadow-sm{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %}">
+        <div class="font-extrabold">Penşenbe</div>
+        <div class="text-[10px] font-normal opacity-80 mt-0.5">4-nji gün</div>
+      </a>
+      <a href="?day=friday&week={{ selected_week }}" class="p-3 rounded-2xl border transition-all {% if selected_day == 'friday' %}bg-indigo-600 text-white border-indigo-600 shadow-sm{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %}">
+        <div class="font-extrabold">Anna</div>
+        <div class="text-[10px] font-normal opacity-80 mt-0.5">5-nji gün</div>
+      </a>
+      <a href="?day=saturday&week={{ selected_week }}" class="p-3 rounded-2xl border transition-all {% if selected_day == 'saturday' %}bg-indigo-600 text-white border-indigo-600 shadow-sm{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %}">
+        <div class="font-extrabold">Şenbe</div>
+        <div class="text-[10px] font-normal opacity-80 mt-0.5">6-nji gün</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. LESSONS CARDS LIST (RICH INTERACTIVE) -->
+  <!-- ========================================== -->
+  <div class="space-y-3" id="lessons-cards-container">
+    {% for lesson in lessons %}
+    <div 
+      class="lesson-card card-hover bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs"
+      data-subject="{{ lesson.subject.name|lower }}"
+      data-teacher="{{ lesson.teacher.full_name|default:''|lower }}"
+      data-auditorium="{{ lesson.auditorium|lower }}"
+      data-notes="{{ lesson.notes|default:''|lower }}"
+      data-period="{{ lesson.period.period_number }}"
+      data-has-notes="{% if lesson.notes %}true{% else %}false{% endif %}"
+    >
+      <div class="flex items-start gap-4">
+        <!-- Para number pill -->
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-extrabold flex flex-col items-center justify-center shrink-0 border border-indigo-200/80 dark:border-indigo-800">
+          <span class="text-base leading-none">{{ lesson.period.period_number }}</span>
+          <span class="text-[9px] uppercase font-bold tracking-wider mt-0.5">Para</span>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-extrabold text-slate-900 dark:text-white text-base">
+              {{ lesson.subject.name }}
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+              {{ lesson.get_lesson_type_display }}
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+              {{ lesson.get_week_type_display }}
+            </span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+            <span class="flex items-center gap-1">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-500"></i>
+              <span>{{ lesson.period.start_time|time:"H:i" }} - {{ lesson.period.end_time|time:"H:i" }}</span>
+            </span>
+            <span class="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i>
+              <span>{{ lesson.auditorium }}</span>
+            </span>
+            {% if lesson.teacher %}
+              <span class="flex items-center gap-1">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-500"></i>
+                <span>{{ lesson.teacher.full_name }}</span>
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Notes Callout -->
+          {% if lesson.notes %}
+            <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-2 mt-1">
+              <i data-lucide="bookmark" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+              <div>
+                <strong class="font-semibold text-amber-800 dark:text-amber-300">Bellik:</strong> 
+                <span>{{ lesson.notes }}</span>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+        <button 
+          onclick="openBotDrawer()"
+          class="px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 transition-colors cursor-pointer flex items-center gap-1"
+        >
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Sorag bermek</span>
+        </button>
+      </div>
+    </div>
+    {% empty %}
+      <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xs">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 mx-auto flex items-center justify-center text-xl mb-3">
+          <i data-lucide="calendar" class="w-6 h-6"></i>
+        </div>
+        <h4 class="font-extrabold text-base text-slate-900 dark:text-white">Bu güne sapak bellenmändir</h4>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+          Başga günleri ýa-da hepdäni saýlap görüň, ýa-da admin panelinde täze sapaklary goşuň.
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- ========================================== -->
+<!-- 6. CLIENT-SIDE LIVE INSTANT SEARCH & SORT -->
+<!-- ========================================== -->
+<script>
+  function runClientSearchSort() {
+    const input = document.getElementById('lesson-search-input');
+    const query = input.value.trim().toLowerCase();
+    const sortVal = document.getElementById('sort-select').value;
+    const cards = Array.from(document.querySelectorAll('.lesson-card'));
+    const badge = document.getElementById('search-badge');
+    const clearBtn = document.getElementById('clear-search-btn');
+
+    if (query) {
+      badge.classList.remove('hidden');
+      clearBtn.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+      clearBtn.classList.add('hidden');
+    }
+
+    // Filter cards
+    cards.forEach(card => {
+      const subject = card.dataset.subject || '';
+      const teacher = card.dataset.teacher || '';
+      const room = card.dataset.auditorium || '';
+      const notes = card.dataset.notes || '';
+      
+      const matches = !query || 
+        subject.includes(query) || 
+        teacher.includes(query) || 
+        room.includes(query) || 
+        notes.includes(query);
+
+      card.style.display = matches ? 'flex' : 'none';
+    });
+
+    // Sort cards
+    const container = document.getElementById('lessons-cards-container');
+    const visibleCards = cards.filter(c => c.style.display !== 'none');
+
+    visibleCards.sort((a, b) => {
+      if (sortVal === 'period') {
+        return parseInt(a.dataset.period || 0) - parseInt(b.dataset.period || 0);
+      } else if (sortVal === 'name') {
+        return (a.dataset.subject || '').localeCompare(b.dataset.subject || '');
+      } else if (sortVal === 'notes') {
+        const aHas = a.dataset.hasNotes === 'true' ? 1 : 0;
+        const bHas = b.dataset.hasNotes === 'true' ? 1 : 0;
+        return bHas - aHas;
+      }
+      return 0;
+    });
+
+    visibleCards.forEach(c => container.appendChild(c));
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function clearSearchInput() {
+    const input = document.getElementById('lesson-search-input');
+    input.value = '';
+    runClientSearchSort();
+  }
+</script>
+{% endblock %}

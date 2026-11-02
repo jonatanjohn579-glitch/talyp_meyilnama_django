@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Talyp Raspisaniýasy we Esasy Portal - TalypMeýilnama{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Top Hero & Next Lesson Banner -->
+  <div class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold">
+          <span>📅</span>
+          <span>{{ today_day_name }}, {{ active_week|title }} Hepde</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Talyp Raspisaniýasy & Dolandyryş Portaly</h2>
+        <p class="text-xs sm:text-sm text-indigo-100 max-w-xl">Sapaklaryňyz, jaňlaryňyz, öý işleriňiz, möhletli ýumuşlaryňyz we şahsy bellikleriňiz bir ýerde.</p>
+      </div>
+      <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-xs space-y-2 max-w-xs shrink-0">
+        <div class="font-bold flex items-center gap-1.5 text-amber-300">
+          <span>🤖</span><span>AI Bellik & Raspisaniýa Kömekçisi</span>
+        </div>
+        <p class="text-indigo-100 text-[11px]">Ýazan bellikleriňiz ýa-da sapaklar barada sorap bilersiňiz.</p>
+        <button onclick="toggleBotModal()" class="w-full py-2 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 shadow-sm transition-colors text-center cursor-pointer">Sorag Soramak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 Summary Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <a href="{% url 'schedule_index' %}" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:border-indigo-400 transition-all flex items-center justify-between">
+      <div>
+        <span class="text-xs text-slate-500 font-medium">Şu günki sapaklar</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ lessons.count }} <span class="text-xs font-normal text-slate-400">para</span></div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center text-lg">📅</div>
+    </a>
+    <a href="{% url 'tasks_index' %}" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:border-indigo-400 transition-all flex items-center justify-between">
+      <div>
+        <span class="text-xs text-slate-500 font-medium">Ýerine ýetirmeli</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ tasks_count }} <span class="text-xs font-normal text-slate-400">iş</span></div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 flex items-center justify-center text-lg">📋</div>
+    </a>
+    <a href="{% url 'homework_index' %}" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:border-indigo-400 transition-all flex items-center justify-between">
+      <div>
+        <span class="text-xs text-slate-500 font-medium">Öý işleri</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ homeworks_count }} <span class="text-xs font-normal text-slate-400">tabşyryk</span></div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center text-lg">📚</div>
+    </a>
+    <a href="{% url 'attendance_index' %}" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:border-indigo-400 transition-all flex items-center justify-between">
+      <div>
+        <span class="text-xs text-slate-500 font-medium">Sapak gatnaşygy</span>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ attendance_records.count }} <span class="text-xs font-normal text-slate-400">sapak</span></div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950 text-rose-600 flex items-center justify-center text-lg">⏱️</div>
+    </a>
+  </div>
+
+  <!-- Instant Search & Sort Bar -->
+  <div class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🔍</span>
+        <h3 class="font-bold text-slate-900 dark:text-white text-sm">Sapaklary Gözlemek & Dessine Tertipleşdirmek</h3>
+        <span id="search-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">Dessine tertiplenýär</span>
+      </div>
+      <select id="sort-select" onchange="runClientSearchSort()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium">
+        <option value="relevance">Gözleg gabat gelşi (Relevance)</option>
+        <option value="period">Jaň tertibi boýunça (1, 2, 3...)</option>
+        <option value="name">Sapak ady boýunça (A-Z)</option>
+        <option value="notes">Diňe bellikleri bolanlar</option>
+      </select>
+    </div>
+    <input 
+      id="lesson-search-input"
+      type="text" 
+      value="{{ search_query }}"
+      placeholder="Gözleg sözüni ýazyň: Sapak ady, mugallym, otag ýa-da konspekt bellikleri..."
+      oninput="runClientSearchSort()"
+      class="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:border-indigo-500 shadow-2xs"
+    />
+  </div>
+
+  <!-- Day & Week Switcher -->
+  <div class="space-y-3">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+      <span class="text-xs font-bold text-slate-700 dark:text-slate-300">
+        Hepde: <span class="text-indigo-600 dark:text-indigo-400">{% if selected_week == 'sanawjy' %}1-nji (Sanawjy){% elif selected_week == 'maydalawjy' %}2-nji (Maýdalawjy){% else %}Hemmesi{% endif %}</span>
+      </span>
+      <div class="flex items-center gap-2 text-xs">
+        <a href="?day={{ selected_day }}&week=sanawjy" class="px-3 py-1.5 rounded-xl border font-semibold {% if selected_week == 'sanawjy' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">1-nji (Sanawjy)</a>
+        <a href="?day={{ selected_day }}&week=maydalawjy" class="px-3 py-1.5 rounded-xl border font-semibold {% if selected_week == 'maydalawjy' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">2-nji (Maýdalawjy)</a>
+        <a href="?day={{ selected_day }}&week=all" class="px-3 py-1.5 rounded-xl border font-semibold {% if selected_week == 'all' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">Hemmesi</a>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center text-xs font-bold">
+      <a href="?day=monday&week={{ selected_week }}" class="p-3 rounded-xl border {% if selected_day == 'monday' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">Duşenbe</a>
+      <a href="?day=tuesday&week={{ selected_week }}" class="p-3 rounded-xl border {% if selected_day == 'tuesday' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">Sişenbe</a>
+      <a href="?day=wednesday&week={{ selected_week }}" class="p-3 rounded-xl border {% if selected_day == 'wednesday' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">Çarşenbe</a>
+      <a href="?day=thursday&week={{ selected_week }}" class="p-3 rounded-xl border {% if selected_day == 'thursday' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">Penşenbe</a>
+      <a href="?day=friday&week={{ selected_week }}" class="p-3 rounded-xl border {% if selected_day == 'friday' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">Anna</a>
+      <a href="?day=saturday&week={{ selected_week }}" class="p-3 rounded-xl border {% if selected_day == 'saturday' %}bg-indigo-600 text-white{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800{% endif %}">Şenbe</a>
+    </div>
+  </div>
+
+  <!-- Lessons List -->
+  <div class="space-y-3" id="lessons-cards-container">
+    {% for lesson in lessons %}
+    <div 
+      class="lesson-card bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs"
+      data-subject="{{ lesson.subject.name|lower }}"
+      data-teacher="{{ lesson.teacher.full_name|default:''|lower }}"
+      data-auditorium="{{ lesson.auditorium|lower }}"
+      data-notes="{{ lesson.notes|default:''|lower }}"
+      data-period="{{ lesson.period.period_number }}"
+      data-has-notes="{% if lesson.notes %}true{% else %}false{% endif %}"
+    >
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-extrabold flex flex-col items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800">
+          <span class="text-base leading-none">{{ lesson.period.period_number }}</span>
+          <span class="text-[9px] uppercase font-bold mt-0.5">Para</span>
+        </div>
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">{{ lesson.subject.name }}</h3>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">{{ lesson.get_lesson_type_display }}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-medium bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">{{ lesson.get_week_type_display }}</span>
+          </div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-3">
+            <span>⏱️ <strong>{{ lesson.period.start_time|time:"H:i" }} - {{ lesson.period.end_time|time:"H:i" }}</strong></span>
+            <span>📍 <strong>{{ lesson.auditorium }}</strong></span>
+            <span>👨‍🏫 {{ lesson.teacher.full_name|default:"Mugallym" }}</span>
+          </div>
+          {% if lesson.notes %}
+          <div class="mt-2 text-xs bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/80 text-amber-900 dark:text-amber-200 font-medium">
+            💬 <strong>Ýatda saklanan bellik:</strong> {{ lesson.notes }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <button onclick="askBotPrompt('{{ lesson.subject.name }} sapagynyň bellikleri')" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 text-slate-700 dark:text-slate-300">🤖 AI Sora</button>
+    </div>
+    {% empty %}
+    <div class="bg-white dark:bg-slate-900 p-12 rounded-3xl border border-slate-200 dark:border-slate-800 text-center text-slate-500 text-sm">
+      Bu gün üçin sapak bellenilmedi.
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Bottom: Notes & Bell Periods -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
+    <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="font-bold text-slate-900 dark:text-white text-sm">📝 Talybyň Ýazan Bellikleri & Konspektleri</h3>
+        <span class="text-xs text-indigo-600 font-bold">{{ student_notes.count }} sany</span>
+      </div>
+      <div class="space-y-2.5 max-h-[300px] overflow-y-auto">
+        {% for note in student_notes %}
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 text-xs space-y-1">
+          <div class="flex items-center justify-between"><h4 class="font-bold">{{ note.title }}</h4><span class="text-[10px] text-slate-400">{{ note.created_at|date:"d.m.Y" }}</span></div>
+          <p class="text-slate-600 dark:text-slate-300">{{ note.content }}</p>
+        </div>
+        {% empty %}
+        <div class="p-6 text-center text-xs text-slate-400">Entäk ýazylan bellik ýok.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="font-bold text-slate-900 dark:text-white text-sm">🔔 Uniwersitetiň Jaň Wagtlary</h3>
+      </div>
+      <div class="space-y-2">
+        {% for b in bells %}
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-xs">
+          <span class="font-bold">{{ b.period_number }}-nji para ({{ b.name }})</span>
+          <span class="font-mono">{{ b.start_time|time:"H:i" }} - {{ b.end_time|time:"H:i" }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function runClientSearchSort() {
+    const q = (document.getElementById('lesson-search-input').value || '').trim().toLowerCase();
+    const sortMode = document.getElementById('sort-select').value;
+    const cards = Array.from(document.querySelectorAll('.lesson-card'));
+    const badge = document.getElementById('search-badge');
+    if (q) { badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+
+    cards.forEach(card => {
+      const subject = card.getAttribute('data-subject') || '';
+      const teacher = card.getAttribute('data-teacher') || '';
+      const notes = card.getAttribute('data-notes') || '';
+      let match = !q || subject.includes(q) || teacher.includes(q) || notes.includes(q);
+      card.style.display = match ? 'flex' : 'none';
+      let score = 0;
+      if (subject.includes(q)) score += 10;
+      if (notes.includes(q)) score += 8;
+      card.dataset.score = score;
+    });
+
+    const visible = cards.filter(c => c.style.display !== 'none');
+    if (sortMode === 'relevance' && q) {
+      visible.sort((a,b) => parseInt(b.dataset.score||0) - parseInt(a.dataset.score||0));
+    } else if (sortMode === 'name') {
+      visible.sort((a,b) => (a.getAttribute('data-subject')||'').localeCompare(b.getAttribute('data-subject')||''));
+    } else if (sortMode === 'notes') {
+      visible.sort((a,b) => (b.getAttribute('data-has-notes')==='true'?1:0) - (a.getAttribute('data-has-notes')==='true'?1:0));
+    }
+    const container = document.getElementById('lessons-cards-container');
+    visible.forEach(c => container.appendChild(c));
+  }
+</script>
+{% endblock %}

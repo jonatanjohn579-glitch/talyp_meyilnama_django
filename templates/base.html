@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="tk" class="light" id="html-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TalypMeýilnama - Uniwersitet Portaly{% endblock %}</title>
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Self-contained Custom Stylesheet & Offline Fallbacks -->
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dark .glass-effect {
+      background: rgba(15, 23, 42, 0.85);
+    }
+    .card-hover {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.12), 0 8px 10px -6px rgba(79, 70, 229, 0.08);
+    }
+  </style>
+
+  <script>
+    // Theme initializer
+    const savedTheme = localStorage.getItem('talyp_theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    }
+  </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors selection:bg-indigo-500 selection:text-white">
+  
+  <!-- ========================================== -->
+  <!-- 1. TOP HEADER (MATCHING REACT HEADER EXACTLY) -->
+  <!-- ========================================== -->
+  <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 transition-colors shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo & Title -->
+        <a href="{% url 'schedule_index' %}" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center text-white font-black text-base shadow-md shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+            TM
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                TalypMeýilnama
+              </h1>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800">
+                Talyp Portaly
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
+              Raspisaniýa, jaňlar, öý işleri we işler sanawy
+            </p>
+          </div>
+        </a>
+
+        <!-- Header Actions: Week Switcher, Buttons, Theme, User -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          
+          <!-- Week Mode Pill Switcher -->
+          <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl hidden md:flex items-center text-xs font-semibold">
+            <span class="text-slate-400 px-2 text-[11px]">Hepde:</span>
+            <button
+              type="button"
+              onclick="setWeekMode('sanawjy')"
+              id="week-btn-sanawjy"
+              class="px-2.5 py-1 rounded-lg transition-all cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900"
+            >
+              1-nji (Sanawjy)
+            </button>
+            <button
+              type="button"
+              onclick="setWeekMode('maydalawjy')"
+              id="week-btn-maydalawjy"
+              class="px-2.5 py-1 rounded-lg transition-all cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900"
+            >
+              2-nji (Maýdalawjy)
+            </button>
+            <button
+              type="button"
+              onclick="setWeekMode('auto')"
+              id="week-btn-auto"
+              class="px-2 py-1 rounded-lg transition-all cursor-pointer text-[11px] text-indigo-600 dark:text-indigo-400 font-bold"
+            >
+              Auto
+            </button>
+          </div>
+
+          <!-- GPA Calculator Button -->
+          <button
+            type="button"
+            onclick="openGradeModal()"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+            title="GPA & Bahalar Hasaplaýjy"
+          >
+            <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
+            <span class="hidden xl:inline text-[11px]">Bahalar</span>
+          </button>
+
+          <!-- Exam Countdown Button -->
+          <button
+            type="button"
+            onclick="openExamModal()"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+            title="Golaýlaşýan synaglar"
+          >
+            <i data-lucide="graduation-cap" class="w-4 h-4 text-rose-500"></i>
+            <span class="hidden xl:inline text-[11px]">Synaglar</span>
+          </button>
+
+          <!-- AI Assistant Bot Button -->
+          <button
+            type="button"
+            onclick="openBotDrawer()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xs shadow-indigo-600/30 transition-all cursor-pointer"
+            title="Talyp kömekçisi: Bellikler, jaňlar, raspisaniýa soramak"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Talyp Kömekçisi</span>
+            <span class="sm:hidden">Bot</span>
+          </button>
+
+          <!-- Theme Toggle (Gije / Gündiz) -->
+          <button
+            type="button"
+            onclick="toggleTheme()"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
+            title="Gije / Gündiz tema"
+          >
+            <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 text-indigo-500 hidden dark:block"></i>
+            <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 text-amber-500 block dark:hidden"></i>
+            <span id="theme-label" class="hidden lg:inline text-[11px]">Tema</span>
+          </button>
+
+          <!-- Admin Shortcut Button -->
+          <a
+            href="/admin/"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-white bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 rounded-xl transition-colors shadow-xs border border-slate-700"
+            title="Django Admin Dolandyryş Paneli"
+          >
+            <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span class="hidden md:inline">Admin</span>
+          </a>
+
+          <!-- User Authentication Section -->
+          {% if user.is_authenticated %}
+            <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200 dark:border-slate-800">
+              <div class="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+                <div class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">
+                  {{ user.first_name|default:user.username|slice:":1"|upper }}
+                </div>
+                <div class="text-left hidden lg:block leading-tight">
+                  <div class="font-bold text-slate-900 dark:text-white truncate max-w-[100px]">{{ user.first_name|default:user.username }}</div>
+                  <div class="text-[9px] text-slate-400 capitalize">Talyp</div>
+                </div>
+              </div>
+              <a href="{% url 'logout' %}" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40" title="Çykmak">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+              </a>
+            </div>
+          {% else %}
+            <a href="{% url 'login' %}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-xs ml-1">
+              <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+              <span>Giriş</span>
+            </a>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. BELL BANNER (MATCHING REACT BELL BANNER) -->
+    <!-- ========================================== -->
+    <div class="bg-white dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800/80 transition-colors">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs">
+          
+          <!-- Live Clock & Today Date -->
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
+              <i data-lucide="clock" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+              <span id="live-clock" class="font-mono text-sm font-bold text-slate-900 dark:text-white tabular-nums tracking-wider">
+                --:--:--
+              </span>
+              <span class="text-slate-300 dark:text-slate-700">|</span>
+              <span id="live-date" class="text-slate-600 dark:text-slate-400 font-medium capitalize text-xs">
+                Duşenbe, Okuw güni
+              </span>
+            </div>
+
+            <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800">
+              <span class="text-slate-400">Işjeň hepde:</span>
+              <span id="active-week-badge" class="font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800">
+                1-nji hepde (Sanawjy)
+              </span>
+            </div>
+          </div>
+
+          <!-- Dynamic Bell Status & Quick Action Buttons -->
+          <div class="flex items-center justify-between md:justify-end gap-2.5 flex-wrap">
+            <div class="flex items-center gap-2 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 font-medium">
+              <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+              <span id="live-bell-text" class="truncate font-semibold">
+                🔔 1-nji para: Ýokary Matematika (08:30 - 10:00) · Aud. 308
+              </span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button
+                type="button"
+                onclick="openBellsModal()"
+                class="inline-flex items-center gap-1 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors cursor-pointer"
+                title="Jaň wagtlaryny görmek"
+              >
+                <span>Jaň tertibi</span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+              </button>
+
+              <button
+                type="button"
+                onclick="openBotDrawer()"
+                class="inline-flex items-center gap-1 px-3 py-1.5 font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800 rounded-xl transition-colors cursor-pointer"
+              >
+                <span>Talyp Kömekçisi</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. GLOBAL NAVIGATION TABS (5 CORE PILLARS) -->
+    <!-- ========================================== -->
+    <div class="border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex items-center space-x-1 sm:space-x-2 py-2 overflow-x-auto text-xs font-bold scrollbar-none">
+          
+          <!-- Raspisaniýa -->
+          <a 
+            href="{% url 'schedule_index' %}" 
+            class="px-3.5 py-1.5 rounded-xl flex items-center gap-2 shrink-0 transition-all {% if request.resolver_match.url_name == 'schedule_index' %}bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs border border-slate-200 dark:border-slate-700 font-extrabold{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}"
+          >
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span>Raspisaniýa</span>
+          </a>
+
+          <!-- Işler (Tasks) -->
+          <a 
+            href="{% url 'tasks_index' %}" 
+            class="px-3.5 py-1.5 rounded-xl flex items-center gap-2 shrink-0 transition-all {% if request.resolver_match.url_name == 'tasks_index' %}bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs border border-slate-200 dark:border-slate-700 font-extrabold{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}"
+          >
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+            <span>Ýerine Ýetirmeli Işler</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">2</span>
+          </a>
+
+          <!-- Öý Işleri (Homework) -->
+          <a 
+            href="{% url 'homework_index' %}" 
+            class="px-3.5 py-1.5 rounded-xl flex items-center gap-2 shrink-0 transition-all {% if request.resolver_match.url_name == 'homework_index' %}bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs border border-slate-200 dark:border-slate-700 font-extrabold{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}"
+          >
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span>Öý Işleri</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">2</span>
+          </a>
+
+          <!-- Sapak Gatnaşygy (Attendance) -->
+          <a 
+            href="{% url 'attendance_index' %}" 
+            class="px-3.5 py-1.5 rounded-xl flex items-center gap-2 shrink-0 transition-all {% if request.resolver_match.url_name == 'attendance_index' %}bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs border border-slate-200 dark:border-slate-700 font-extrabold{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}"
+          >
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+            <span>Sapak Gatnaşygy</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">36 sagat</span>
+          </a>
+
+          <!-- Admin Dolandyryş Paneli -->
+          <a 
+            href="/admin/" 
+            class="px-3.5 py-1.5 rounded-xl flex items-center gap-2 shrink-0 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+            <span>Admin Paneli</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Messages -->
+  {% if messages %}
+    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      {% for message in messages %}
+        <div class="p-3 mb-2 rounded-2xl text-xs font-semibold border flex items-center gap-2 shadow-xs {% if message.tags == 'error' %}bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200{% elif message.tags == 'success' %}bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-200{% else %}bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900 text-indigo-800 dark:text-indigo-200{% endif %}">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Main Content Slot -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 4. UNIVERSAL FOOTER -->
+  <!-- ========================================== -->
+  <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors mt-12">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px]">TM</div>
+        <p>TalypMeýilnama · Türkmenistanyň uniwersitet talyplary üçin doly sanawjy/maýdalawjy portaly</p>
+      </div>
+      <div class="flex items-center gap-3 font-semibold">
+        <a href="{% url 'schedule_index' %}" class="hover:text-indigo-600">Raspisaniýa</a>
+        <span>·</span>
+        <a href="{% url 'tasks_index' %}" class="hover:text-indigo-600">Işler</a>
+        <span>·</span>
+        <a href="{% url 'homework_index' %}" class="hover:text-indigo-600">Öý işleri</a>
+        <span>·</span>
+        <a href="{% url 'attendance_index' %}" class="hover:text-indigo-600">Gatnaşyk</a>
+        <span>·</span>
+        <a href="/admin/" class="hover:text-indigo-600">Admin Paneli</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- 5. INTERACTIVE MODAL: JAŇ TERTIBI (BELLS) -->
+  <!-- ========================================== -->
+  <div id="bells-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bell" class="w-5 h-5 text-amber-500"></i>
+          <h3 class="font-black text-base text-slate-900 dark:text-white">Uniwersitet Jaň Tertibi</h3>
+        </div>
+        <button onclick="closeBellsModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg text-lg font-bold">&times;</button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-xs">1</span>
+            <span>1-nji para</span>
+          </div>
+          <div class="font-mono text-slate-700 dark:text-slate-300 font-bold">08:30 - 10:00</div>
+          <span class="text-[11px] text-slate-400">15 min arakesme</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-xs">2</span>
+            <span>2-nji para</span>
+          </div>
+          <div class="font-mono text-slate-700 dark:text-slate-300 font-bold">10:15 - 11:45</div>
+          <span class="text-[11px] text-amber-600 font-bold">45 min nahar arakesmesi</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-xs">3</span>
+            <span>3-nji para</span>
+          </div>
+          <div class="font-mono text-slate-700 dark:text-slate-300 font-bold">12:30 - 14:00</div>
+          <span class="text-[11px] text-slate-400">15 min arakesme</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-xs">4</span>
+            <span>4-nji para</span>
+          </div>
+          <div class="font-mono text-slate-700 dark:text-slate-300 font-bold">14:15 - 15:45</div>
+          <span class="text-[11px] text-slate-400">15 min arakesme</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-xs">5</span>
+            <span>5-nji para</span>
+          </div>
+          <div class="font-mono text-slate-700 dark:text-slate-300 font-bold">16:00 - 17:30</div>
+          <span class="text-[11px] text-slate-400">Günüň ahyry</span>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button onclick="closeBellsModal()" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs hover:bg-slate-200">
+          Ýapmak
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6. INTERACTIVE MODAL: GPA BAHALAR HASAPLAÝJY -->
+  <!-- ========================================== -->
+  <div id="grade-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="award" class="w-5 h-5 text-amber-500"></i>
+          <h3 class="font-black text-base text-slate-900 dark:text-white">GPA & Bahalar Hasaplaýjy</h3>
+        </div>
+        <button onclick="closeGradeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg text-lg font-bold">&times;</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <p class="text-slate-500">Sapaklaryňyzyň bahalaryny (5, 4, 3) giriziň we ortaça balyňyzy hasaplaň:</p>
+        
+        <div class="space-y-2">
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <span>Ýokary Matematika</span>
+            <select class="grade-input bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border text-xs font-bold" onchange="calcGpa()">
+              <option value="5">5 (A - Bäşlik)</option>
+              <option value="4">4 (B - Dörtlük)</option>
+              <option value="3">3 (C - Üçlük)</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <span>Maglumat Ulgamlary</span>
+            <select class="grade-input bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border text-xs font-bold" onchange="calcGpa()">
+              <option value="5" selected>5 (A - Bäşlik)</option>
+              <option value="4">4 (B - Dörtlük)</option>
+              <option value="3">3 (C - Üçlük)</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <span>Maglumat Howpsuzlygy</span>
+            <select class="grade-input bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border text-xs font-bold" onchange="calcGpa()">
+              <option value="5">5 (A - Bäşlik)</option>
+              <option value="4" selected>4 (B - Dörtlük)</option>
+              <option value="3">3 (C - Üçlük)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-center">
+          <span class="text-[11px] text-indigo-700 dark:text-indigo-300 uppercase font-bold tracking-wider">Hasaplanan Ortaça Bal</span>
+          <div id="gpa-result" class="text-3xl font-black text-indigo-700 dark:text-indigo-400 mt-0.5">4.67</div>
+          <span class="text-xs text-indigo-600 dark:text-indigo-300 font-medium">Ýokary görkeziji (Tapawutlanan talyp)</span>
+        </div>
+      </div>
+
+      <button onclick="closeGradeModal()" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs">
+        Ýapmak
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 7. INTERACTIVE MODAL: SYNAGLAR (EXAMS) -->
+  <!-- ========================================== -->
+  <div id="exam-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-5 h-5 text-rose-500"></i>
+          <h3 class="font-black text-base text-slate-900 dark:text-white">Golaýlaşýan Synaglar</h3>
+        </div>
+        <button onclick="closeExamModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg text-lg font-bold">&times;</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-rose-200 dark:border-rose-900 shadow-xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-900 dark:text-white">Maglumat Ulgamlary we Programmirleme</span>
+            <span class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 font-bold">14 gün galdy</span>
+          </div>
+          <div class="text-slate-500 flex items-center gap-3">
+            <span>📅 25 Oktýabr 2026</span>
+            <span>⏰ 09:00</span>
+            <span>📍 IT Lab 405</span>
+          </div>
+          <p class="text-[11px] text-slate-600 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700">
+            Temalar: Python OOP, Django ORM, REST API CRUD soraglary.
+          </p>
+        </div>
+      </div>
+
+      <button onclick="closeExamModal()" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs">
+        Ýapmak
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 8. SLIDE-OVER DRAWER: TALYP KÖMEKÇISI (AI BOT) -->
+  <!-- ========================================== -->
+  <div id="bot-drawer-backdrop" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs" onclick="closeBotDrawer()"></div>
+  <div id="bot-drawer" class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300">
+    
+    <!-- Drawer Header -->
+    <div class="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-indigo-600 to-indigo-700 text-white">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+          <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-sm">Talyp Kömekçisi</h3>
+          <p class="text-[11px] text-indigo-100">Raspisaniýa, jaňlar, bellikler we tabşyryklar</p>
+        </div>
+      </div>
+      <button onclick="closeBotDrawer()" class="text-white/80 hover:text-white p-1 text-xl font-bold">&times;</button>
+    </div>
+
+    <!-- Chat Messages Box -->
+    <div id="bot-messages" class="flex-1 overflow-y-auto p-4 space-y-3 text-xs">
+      <div class="flex items-start gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 text-xs">🤖</div>
+        <div class="bg-slate-100 dark:bg-slate-800 p-3.5 rounded-2xl rounded-tl-xs max-w-[85%] text-slate-800 dark:text-slate-200 leading-relaxed shadow-xs">
+          Salam! Men siziň uniwersitet kömekçiňiz. Aşakdaky taýýar soraglardan birini saýlap bilersiňiz ýa-da soragyňyzy ýazyň:
+        </div>
+      </div>
+
+      <!-- Quick Prompt Pills -->
+      <div class="flex flex-wrap gap-1.5 pt-2">
+        <button onclick="sendQuickBotQuery('Şu gün näme sapak bar?')" class="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 cursor-pointer">
+          📅 Şu gün näme sapak bar?
+        </button>
+        <button onclick="sendQuickBotQuery('Ertir näme öý işi bar?')" class="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 cursor-pointer">
+          📚 Ertirki öý işleri
+        </button>
+        <button onclick="sendQuickBotQuery('Indiki jaň haçan kakar?')" class="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 cursor-pointer">
+          🔔 Indiki jaň haçan?
+        </button>
+        <button onclick="sendQuickBotQuery('Gatnaşyk çägim nähili?')" class="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 cursor-pointer">
+          ⏱️ Gatnaşyk hasabym
+        </button>
+      </div>
+    </div>
+
+    <!-- Drawer Input Form -->
+    <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+      <form onsubmit="handleBotSubmit(event)" class="flex items-center gap-2">
+        <input 
+          id="bot-input"
+          type="text" 
+          placeholder="Soragyňyzy ýazyň..."
+          class="flex-1 px-3.5 py-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
+        />
+        <button type="submit" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold cursor-pointer shrink-0">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 9. JAVASCRIPT SYSTEM ENGINE -->
+  <!-- ========================================== -->
+  <script>
+    // Lucide Icons initialization
+    function initIcons() {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initIcons);
+
+    // Live Clock & Real-time bell update
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const clockEl = document.getElementById('live-clock');
+      if (clockEl) {
+        clockEl.textContent = `${hours}:${minutes}:${seconds}`;
+      }
+
+      const dateEl = document.getElementById('live-date');
+      if (dateEl) {
+        const days = ['Ýekşenbe', 'Duşenbe', 'Sişenbe', 'Çarşenbe', 'Penşenbe', 'Anna', 'Şenbe'];
+        const months = ['Ýanwar', 'Fewral', 'Mart', 'Aprel', 'Maý', 'Iýun', 'Iýul', 'Awgust', 'Sentýabr', 'Oktýabr', 'Noýabr', 'Dekabr'];
+        dateEl.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+      }
+
+      // Bell status evaluation
+      const bellTextEl = document.getElementById('live-bell-text');
+      if (bellTextEl) {
+        const curMins = now.getHours() * 60 + now.getMinutes();
+        if (curMins >= 8 * 60 + 30 && curMins <= 10 * 60) {
+          const rem = 10 * 60 - curMins;
+          bellTextEl.textContent = `🔔 1-nji para gidýär (Ýokary Matematika) · Jaňa ${rem} minut galdy`;
+        } else if (curMins > 10 * 60 && curMins < 10 * 60 + 15) {
+          bellTextEl.textContent = `☕ 1-nji arakesme (15 minut) · 2-nji para 10:15-de`;
+        } else if (curMins >= 10 * 60 + 15 && curMins <= 11 * 60 + 45) {
+          const rem = 11 * 60 + 45 - curMins;
+          bellTextEl.textContent = `🔔 2-nji para gidýär (Maglumat Ulgamlary) · Jaňa ${rem} minut galdy`;
+        } else {
+          bellTextEl.textContent = `🔔 1-nji para: Ýokary Matematika (08:30 - 10:00) · Aud. 308 (Baş bina)`;
+        }
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Theme Toggle Function
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        localStorage.setItem('talyp_theme', 'light');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('talyp_theme', 'dark');
+      }
+      initIcons();
+    }
+
+    // Week mode switcher
+    function setWeekMode(mode) {
+      localStorage.setItem('talyp_week_mode', mode);
+      const url = new URL(window.location.href);
+      if (mode === 'auto') {
+        url.searchParams.delete('week');
+      } else {
+        url.searchParams.set('week', mode);
+      }
+      window.location.href = url.toString();
+    }
+
+    // Modals controls
+    function openBellsModal() {
+      document.getElementById('bells-modal').classList.remove('hidden');
+      initIcons();
+    }
+    function closeBellsModal() {
+      document.getElementById('bells-modal').classList.add('hidden');
+    }
+
+    function openGradeModal() {
+      document.getElementById('grade-modal').classList.remove('hidden');
+      initIcons();
+    }
+    function closeGradeModal() {
+      document.getElementById('grade-modal').classList.add('hidden');
+    }
+
+    function calcGpa() {
+      const inputs = document.querySelectorAll('.grade-input');
+      let sum = 0;
+      inputs.forEach(i => sum += parseFloat(i.value));
+      const avg = (sum / inputs.length).toFixed(2);
+      document.getElementById('gpa-result').textContent = avg;
+    }
+
+    function openExamModal() {
+      document.getElementById('exam-modal').classList.remove('hidden');
+      initIcons();
+    }
+    function closeExamModal() {
+      document.getElementById('exam-modal').classList.add('hidden');
+    }
+
+    // Bot Drawer controls
+    function openBotDrawer() {
+      document.getElementById('bot-drawer-backdrop').classList.remove('hidden');
+      document.getElementById('bot-drawer').classList.remove('translate-x-full');
+      initIcons();
+    }
+    function closeBotDrawer() {
+      document.getElementById('bot-drawer-backdrop').classList.add('hidden');
+      document.getElementById('bot-drawer').classList.add('translate-x-full');
+    }
+
+    function sendQuickBotQuery(q) {
+      addBotMessage(q, 'user');
+      setTimeout(() => {
+        let ans = "Soraňyz boýunça maglumat tapyldy:";
+        if (q.includes('sapak')) {
+          ans = "📅 Duşenbe günki raspisaniýa (Sanawjy):\n• 1-nji para (08:30): Ýokary Matematika (Aud. 308)\n• 2-nji para (10:15): Maglumat Ulgamlary we Programmirleme (IT Lab 405)\n• 3-nji para (12:30): Maglumat Howpsuzlygy (Aud. 210)";
+        } else if (q.includes('öý')) {
+          ans = "📚 Ýakyn öý işleri:\n• Ýokary Matematika: Differensial deňlemeler meseleleri (Möhleti: Ertir, 08:30)\n• Maglumat Ulgamlary: Django REST API CRUD laboratoriýasy (Möhleti: Anna, 10:15)";
+        } else if (q.includes('jaň')) {
+          ans = "🔔 Indiki para 08:30-da başlaýar. Arakesme: 10:00 - 10:15 (15 min). Uly nahar arakesmesi: 11:45 - 12:30 (45 min).";
+        } else if (q.includes('Gatnaşyk')) {
+          ans = "⏱️ Sapak gatnaşygy:\n• Ýokary Matematika: 32 sagat gatnaşyldy, 4 sagat rugsatsyz. Rugsat çägi: 36 sagat. (Howp ýok, galan çäk: 32 sagat).";
+        }
+        addBotMessage(ans, 'bot');
+      }, 350);
+    }
+
+    function handleBotSubmit(e) {
+      e.preventDefault();
+      const inp = document.getElementById('bot-input');
+      const val = inp.value.trim();
+      if (!val) return;
+      inp.value = '';
+      sendQuickBotQuery(val);
+    }
+
+    function addBotMessage(text, role) {
+      const container = document.getElementById('bot-messages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `flex items-start gap-2.5 ${role === 'user' ? 'justify-end' : ''}`;
+      
+      if (role === 'user') {
+        msgDiv.innerHTML = `
+          <div class="bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-xs max-w-[85%] text-xs shadow-xs whitespace-pre-line">
+            ${text}
+          </div>
+          <div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0 text-xs">👤</div>
+        `;
+      } else {
+        msgDiv.innerHTML = `
+          <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 text-xs">🤖</div>
+          <div class="bg-slate-100 dark:bg-slate-800 p-3.5 rounded-2xl rounded-tl-xs max-w-[85%] text-slate-800 dark:text-slate-200 leading-relaxed shadow-xs whitespace-pre-line">
+            ${text}
+          </div>
+        `;
+      }
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+      initIcons();
+    }
+  </script>
+</body>
+</html>

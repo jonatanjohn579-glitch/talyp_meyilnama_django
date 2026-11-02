@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Öý Işleri we Tabşyryklar - TalypMeýilnama{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  
+  <!-- Header Title & Filter Tabs -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+    <div>
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold mb-1 border border-emerald-200 dark:border-emerald-800">
+        <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+        <span>Mugallymlaryň Tabşyryklary</span>
+      </div>
+      <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Öý Işleri Sanawy</h2>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Garaşylýan tabşyryklar, goşmaça materiallar we tabşyryş möhletleri</p>
+    </div>
+    
+    <!-- Status Filter Buttons -->
+    <div class="flex items-center gap-2 text-xs">
+      <a href="?status=pending{% if selected_subject %}&subject={{ selected_subject }}{% endif %}" class="px-3.5 py-1.5 rounded-xl border font-bold transition-all {% if current_status == 'pending' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+        Garaşylýan ({% if current_status == 'pending' %}{{ homeworks.count }}{% endif %})
+      </a>
+      <a href="?status=completed{% if selected_subject %}&subject={{ selected_subject }}{% endif %}" class="px-3.5 py-1.5 rounded-xl border font-bold transition-all {% if current_status == 'completed' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+        Ýerine ýetirilen
+      </a>
+      <a href="?status=all{% if selected_subject %}&subject={{ selected_subject }}{% endif %}" class="px-3.5 py-1.5 rounded-xl border font-bold transition-all {% if current_status == 'all' %}bg-indigo-600 text-white border-indigo-600 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+        Hemmesi
+      </a>
+    </div>
+  </div>
+
+  <!-- Subject Pills Filter -->
+  <div class="flex flex-wrap items-center gap-2 text-xs">
+    <a href="?status={{ current_status }}" class="px-3 py-1.5 rounded-xl font-bold transition-all {% if not selected_subject %}bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+      Ähli sapaklar
+    </a>
+    {% for sub in subjects %}
+    <a href="?status={{ current_status }}&subject={{ sub.id }}" class="px-3 py-1.5 rounded-xl font-bold transition-all {% if selected_subject == sub.id|stringformat:'s' %}bg-indigo-600 text-white shadow-xs{% else %}bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50{% endif %}">
+      {{ sub.name }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Homework List -->
+  <div class="space-y-3">
+    {% for hw in homeworks %}
+    <div class="card-hover bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+      <div class="space-y-1.5">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+            {{ hw.subject.name }}
+          </span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold {% if hw.priority == 'yokary' %}bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300{% elif hw.priority == 'orta' %}bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300{% else %}bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300{% endif %}">
+            {{ hw.get_priority_display }} dereje
+          </span>
+          {% if hw.is_completed %}
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+              Ýerine ýetirildi
+            </span>
+          {% endif %}
+        </div>
+
+        <h3 class="font-extrabold text-slate-900 dark:text-white text-base {% if hw.is_completed %}line-through text-slate-400{% endif %}">
+          {{ hw.title }}
+        </h3>
+
+        {% if hw.description %}
+          <p class="text-xs text-slate-600 dark:text-slate-300">
+            {{ hw.description }}
+          </p>
+        {% endif %}
+
+        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
+          <span class="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-bold">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>Möhleti: {{ hw.due_date|date:"d M Y" }}{% if hw.due_time %}, {{ hw.due_time|time:"H:i" }}{% endif %}</span>
+          </span>
+          {% if hw.attachments_note %}
+            <span class="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
+              <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+              <span>{{ hw.attachments_note }}</span>
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="self-end sm:self-center shrink-0">
+        <a href="/admin/homework/homework/{{ hw.id }}/change/" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          Barlamak
+        </a>
+      </div>
+    </div>
+    {% empty %}
+      <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xs">
+        <i data-lucide="book-open" class="w-10 h-10 text-emerald-500 mx-auto mb-2"></i>
+        <h4 class="font-extrabold text-base text-slate-900 dark:text-white">Garaşylýan öý işi ýok</h4>
+        <p class="text-xs text-slate-500 mt-1">Bu filter boýunça ähli tabşyryklar tabşyryldy.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
