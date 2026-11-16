@@ -1,5 +1,4 @@
-﻿@'
-name: Django CI/CD
+﻿name: Django CI/CD
 
 on:
   push:
@@ -26,4 +25,3 @@ jobs:
 
       - name: Django system check
         run: python manage.py check
-'@ | Set-Content -Encoding utf8 .github\workflows\django.yml
