@@ -1,20 +1,17 @@
-﻿name: Django CI
+﻿@'
+name: Django CI/CD
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-
-permissions:
-  contents: read
+  workflow_dispatch:
 
 jobs:
-  django-check:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -27,6 +24,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check Django
-        run: |
-          python manage.py check
+      - name: Django system check
+        run: python manage.py check
+'@ | Set-Content -Encoding utf8 .github\workflows\django.yml
