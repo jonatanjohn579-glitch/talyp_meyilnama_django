@@ -12,10 +12,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Check VPS secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          test -n "$VPS_HOST" || { echo "VPS_HOST is missing"; exit 1; }
+          test -n "$VPS_USER" || { echo "VPS_USER is missing"; exit 1; }
+          test -n "$VPS_SSH_KEY" || { echo "VPS_SSH_KEY is missing"; exit 1; }
+          echo "All three secrets are available."
 
-      - name: Deploy Django project
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -24,11 +32,9 @@ jobs:
           port: 22
           command_timeout: 30m
           script: |
-            set -e
-
+            echo "Connected to VPS"
             apt-get update
             apt-get install -y python3 python3-venv python3-pip git
-
             mkdir -p /var/www
             if [ ! -d /var/www/talyp_meyilnama_django/.git ]; then
               git clone https://github.com/jonatanjohn579-glitch/talyp_meyilnama_django.git /var/www/talyp_meyilnama_django
@@ -36,15 +42,9 @@ jobs:
               cd /var/www/talyp_meyilnama_django
               git pull origin main
             fi
-
             cd /var/www/talyp_meyilnama_django
-
             python3 -m venv venv
             source venv/bin/activate
-            pip install --upgrade pip
             pip install -r requirements.txt
-
             python manage.py migrate
             python manage.py collectstatic --noinput
-
-            echo "Django project files installed successfully."
