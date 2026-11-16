@@ -1,8 +1,10 @@
-﻿name: Django VPS Deployment
+﻿
+name: Django VPS Auto Deploy
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -10,21 +12,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Connect to VPS and deploy
+      - name: Deploy Django project
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
+          command_timeout: 30m
           script: |
+            set -e
+
+            apt-get update
+            apt-get install -y python3 python3-venv python3-pip git
+
+            mkdir -p /var/www
+            if [ ! -d /var/www/talyp_meyilnama_django/.git ]; then
+              git clone https://github.com/jonatanjohn579-glitch/talyp_meyilnama_django.git /var/www/talyp_meyilnama_django
+            else
+              cd /var/www/talyp_meyilnama_django
+              git pull origin main
+            fi
+
             cd /var/www/talyp_meyilnama_django
-            git pull origin main
+
+            python3 -m venv venv
             source venv/bin/activate
+            pip install --upgrade pip
             pip install -r requirements.txt
+
             python manage.py migrate
             python manage.py collectstatic --noinput
-            sudo systemctl restart talyp_meyilnama
+
+            echo "Django project files installed successfully."
